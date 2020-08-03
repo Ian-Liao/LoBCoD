@@ -10,7 +10,9 @@
 %              the horizontal and vertical directions.
 % (4) G      - The gradient matrix "G = eye + mu*(Gx'*Gx+Gy'*Gy)".
 % 
+clear all;
 
+% Load necessary dependencies
 addpath('functions')
 addpath mexfiles;
 addpath image_helpers;
@@ -19,8 +21,10 @@ addpath('utilities');
 addpath(genpath('spams-matlab'));
 vl_setup();
 
+% This mat file contains Background_inFocus, Foreground_inFocus, D_init
+% G, Gx, Gy and z_bird_rgb variables
 load('datasets/Multi_Focus_example/Multi_Focus_param.mat');
-lambda =1;
+lambda = 1;
 mu = 5;
 n =  sqrt(size(D_init,1));
 m = size(D_init,2);
@@ -29,10 +33,12 @@ MAXITER_pursuit = 250;
 I = cell(1,2);
 sz = cell(1,2);
 
+% Transform blurred colored images to the Lab color space
 Background_inFocus_lab = rgb2lab(Background_inFocus);
 Foreground_inFocus_lab = rgb2lab(Foreground_inFocus);
 I_original = rgb2lab(z_bird_rgb);
 
+% Run the algorithm on the L channels
 I{1} = Background_inFocus_lab(:,:,1);
 I{2} = Foreground_inFocus_lab(:,:,1);
 I_original = double(I_original(:,:,1));
@@ -43,7 +49,7 @@ sz_vec = sz{1}(1)*sz{1}(2);
 N=length(I);
 patches = myim2col_set_nonoverlap(I{1}, n);
 
-
+% Initialize variables
 MAXITER = 2;
 Xb = cell(1,N);
 X_resb = cell(1,N);
@@ -58,7 +64,7 @@ params.MAXITER = MAXITER_pursuit;
 params.D = D_init;
 params.Train_on = false(1);
 
-
+% Update the dictionary matrix via LoBCoD
 for k=1:N
     Xe{k} = zeros(size(I{k}));
 end
@@ -66,6 +72,7 @@ for outerIter = 1 : MAXITER
     for i=1:N
         X_resb{i} = I{i}-Xe{i};
         X_resb{i} = padarray(X_resb{i},[1 1],'symmetric','both');
+        % lsqminnorm: returns a vector X that minimizes norm(A*X - B)
         Xb{i} = reshape(lsqminnorm(G,X_resb{i}(:)),(sz{i}(1)+2),(sz{i}(2)+2));
         Xb{i} = real(Xb{i}(1:sz{1}(1),1:sz{1}(2)));
         X_res_e{i} = I{i}-Xb{i};
@@ -73,46 +80,60 @@ for outerIter = 1 : MAXITER
     end
 
     params.Ytrain = X_res_e;
+    % alpha: the output sparse needles. 
     [Xe,objective,avgpsnr,sparsity,totTime,alpha,~] = LoBCoD(params);
     D_opt = D_init;
 
 end
 
+fprintf('Finish updating the dictionary!\n');
 %% Fusion
 
-A = cell(1,N);
-k = (1/14)*ones(14,14);
 [feature_maps,~] = create_feature_maps(alpha,n,m,sz{1},D_opt);
 
 fused_feature_maps = cell(1);
 fused_feature_maps{1} = cell(size(feature_maps{1}));
-Clean_xe = cell(1,length(patches));
 
+% Build an activity map A
+A = cell(1,N);
 A{1} = abs(feature_maps{1}{1});
 A{2} = abs(feature_maps{2}{1});
 for j=2:m
    A{1} = A{1}+abs(feature_maps{1}{j});
    A{2} = A{2}+abs(feature_maps{2}{j});
 end
+
+fprintf('Finish building the activity map!\n');
+
+% Convolve A with a uniform kernel k
+k = (1/14)*ones(14,14);
 A{1} = rconv2(A{1},k);
 A{2} = rconv2(A{2},k);
 
+fprintf('Finish convolving A with a uniform kernel k!\n');
+
+% Reconstruct the all-in-focus components by assembling the most prominent
+% regions based on their values in the corresponding activity maps
 for j=1:m
     fused_feature_maps{1}{j} = (A{1}>=A{2}).*feature_maps{1}{j}+(A{1}<A{2}).*feature_maps{2}{j};
 end
 
+% the fusion result is obtained by gathering its components:
+% Yf = Yb + sum(1~m)di*Zi
 [alpha_fused,I_rec] = extract_feature_maps(fused_feature_maps,n,m,sz{1},D_opt);
+Clean_xe = cell(1,length(patches));
 for j=1:n^2 
    Clean_xe{j}= D_opt*alpha_fused{1}{j};
 end
        
 fused_image_e = mycol2im_set_nonoverlap(Clean_xe,sz{1}, n);
+% Compute the base component of the fused image Yf
 fused_image_b = (A{1}>=A{2}).*Xb{1}+(A{1}<A{2}).*Xb{2};
 ours_lab = Foreground_inFocus_lab;
 ours_lab(:,:,1)= fused_image_e+fused_image_b;
 ours_lab(:,:,2) = (A{1}>=A{2}).*double(Background_inFocus_lab(:,:,2))+(A{1}<A{2}).*double(Foreground_inFocus_lab(:,:,2));
 ours_lab(:,:,3) = (A{1}>=A{2}).*double(Background_inFocus_lab(:,:,3))+(A{1}<A{2}).*double(Foreground_inFocus_lab(:,:,3));
-
+fprintf('Finish fusing the two images!\n');
 
 % PSNR calculation, ignoring boundaries
 PSNR = 20*log10((255*sqrt(numel(I{1}(8:sz{1}-8,8:sz{1}-8))) / norm(reshape(fused_image_e(8:sz{1}-8,8:sz{1}-8)+fused_image_b(8:sz{1}-8,8:sz{1}-8) - I_original(8:sz{1}-8,8:sz{1}-8),1,[]))));

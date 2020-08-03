@@ -18,8 +18,8 @@ addpath(genpath('spams-matlab'));
 vl_setup();
 
 I_org = cell(1,2);
-I_org{1} = double((imread('datasets\Multi_Exposure\B.jpg')));
-I_org{2} = double((imread('datasets\Multi_Exposure\C.jpg')));
+I_org{1} = double((imread('datasets/Multi_Exposure/A.jpg')));
+I_org{2} = double((imread('datasets/Multi_Exposure/D.jpg')));
 
 I_org_1 = I_org{1}(101:400,101:500,:);
 I_org_2 = I_org{2}(101:400,101:500,:);
@@ -34,7 +34,7 @@ I_lab{1} = rgb2lab(I_org{1});
 I_lab{2} = rgb2lab(I_org{2});
 
 
-load('datasets\Multi_Exposure\param.mat');
+load('datasets/Multi_Exposure/param.mat');
 lambda =1;
 mu = 5;
 n =  sqrt(size(D_init,1));

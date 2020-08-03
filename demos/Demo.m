@@ -3,6 +3,10 @@
 % This demo shows how to apply the LoBCoD algorithm to train the
 % CSC dictionary
 
+% added after git clone
+% addpath('ompbox');
+% addpath('ksvdbox');
+
 addpath('functions')
 addpath mexfiles;
 addpath image_helpers;
@@ -12,7 +16,7 @@ addpath(genpath('spams-matlab'));
 vl_setup();
 
 
-imgs_path = 'datasets\fruit_100_100';
+imgs_path = 'datasets/fruit_100_100';
 n = 8; % patch size
 m = 81; % number of filters
 I = Create_Zearo_Mean_Images(imgs_path,n);

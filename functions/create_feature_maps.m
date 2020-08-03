@@ -7,7 +7,7 @@ one_vec = zeros(n^2,1);
 one_vec(1) = 1;
 alpha_rec = cell(size(alpha));
 I_patches_rec =  cell(size(alpha));
-I_rec = cell(1,N);
+
 for i=1:N
     for j=1:m
         for k=1:n^2
@@ -19,6 +19,7 @@ for i=1:N
 
 end
 
+I_rec = cell(1,N);
 for i=1:N
     for j=1:m
          alpha_mapM{1} = myim2col_set_nonoverlap(feature_maps{i}{j},n);

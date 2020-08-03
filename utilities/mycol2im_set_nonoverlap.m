@@ -5,12 +5,14 @@ im = zeros(sz + 2*(n-1));
 for dx = 1:n
     for dy = 1:n
         cur_sz = sz + 2*(n-1) - [dy-1, dx-1];
+        % arranges the blocks in rec with a step size of (n,n) between them.
         rec = col2imstep(patches{cnt}, cur_sz, [n,n], [n,n]);
         im(dy:end, dx:end) = im(dy:end, dx:end) + rec;
         cnt = cnt + 1;
     end
 end
 
+% Crop the n-1 boundary elements from the resulting feature maps
 im = im(n:end-n+1, n:end-n+1);
 
 return

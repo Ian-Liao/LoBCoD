@@ -9,7 +9,7 @@ addpath(genpath('spams-matlab'));
 vl_setup();
 
 
-imgs_path = 'datasets\single';
+imgs_path = 'datasets/single';
 n = 8; % patch size
 m = 81; % number of filters
 [I,noisyI,M,noisyImean,lmnI] = Create_Zearo_Mask(imgs_path,n);
