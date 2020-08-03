@@ -25,7 +25,6 @@ vl_setup();
 % G, Gx, Gy and z_bird_rgb variables
 load('datasets/Multi_Focus_example/Multi_Focus_param.mat');
 lambda = 1;
-mu = 5;
 n =  sqrt(size(D_init,1));
 m = size(D_init,2);
 MAXITER_pursuit = 250;
@@ -56,7 +55,6 @@ X_resb = cell(1,N);
 X_res_e = cell(1,N);
 alpha =  cell(1,N);
 Xe = cell(1,N);
-epsilon = 1e-20; 
 
 params = [];
 params.lambda = lambda;
