@@ -39,6 +39,13 @@ For Windows
 This code is self-contained and includes all the precompiled packages.
 ```
 
+## How to run
+
+Before running any demo program within the demos/ path, run the command in Command Window below:
+```console
+addpath demos
+```
+
 ## Description
 This package contains the following main modules:
 
