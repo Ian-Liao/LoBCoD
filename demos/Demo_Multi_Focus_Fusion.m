@@ -10,7 +10,7 @@
 %              the horizontal and vertical directions.
 % (4) G      - The gradient matrix "G = eye + mu*(Gx'*Gx+Gy'*Gy)".
 % 
-clear all;
+clear;
 
 % Load necessary dependencies
 addpath('functions')
@@ -24,6 +24,9 @@ vl_setup();
 % This mat file contains Background_inFocus, Foreground_inFocus, D_init
 % G, Gx, Gy and z_bird_rgb variables
 load('datasets/Multi_Focus_example/Multi_Focus_param.mat');
+% Background_inFocus = imread('datasets/Multi_Focus_example/background_inFocus_sheep.jpg');
+% Foreground_inFocus = imread('datasets/Multi_Focus_example/foreground_inFocus_sheep.jpg');
+% z_sheep_rgb = imread('datasets/Multi_Focus_example/sheep.jpeg');
 lambda = 1;
 n =  sqrt(size(D_init,1));
 m = size(D_init,2);
@@ -36,6 +39,8 @@ sz = cell(1,2);
 Background_inFocus_lab = rgb2lab(Background_inFocus);
 Foreground_inFocus_lab = rgb2lab(Foreground_inFocus);
 I_original = rgb2lab(z_bird_rgb);
+% I_original = rgb2lab(z_sheep_rgb);
+
 
 % Run the algorithm on the L channels
 I{1} = Background_inFocus_lab(:,:,1);
@@ -66,11 +71,14 @@ params.Train_on = false(1);
 for k=1:N
     Xe{k} = zeros(size(I{k}));
 end
+% Alternate between minimizing w.r.t. the base component Yb and
+% the feature map Zi
 for outerIter = 1 : MAXITER
     for i=1:N
         X_resb{i} = I{i}-Xe{i};
         X_resb{i} = padarray(X_resb{i},[1 1],'symmetric','both');
-        % lsqminnorm: returns a vector X that minimizes norm(A*X - B)
+        % lsqminnorm: Minimum-norm solution of least-square system
+        % returns a vector X that minimizes norm(A*X - B)
         Xb{i} = reshape(lsqminnorm(G,X_resb{i}(:)),(sz{i}(1)+2),(sz{i}(2)+2));
         Xb{i} = real(Xb{i}(1:sz{1}(1),1:sz{1}(2)));
         X_res_e{i} = I{i}-Xb{i};
