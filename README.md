@@ -34,10 +34,10 @@ This code uses the following packages:
 * [vlfeat](https://github.com/vlfeat/vlfeat) - An open library of computer vision algorithms.
 * [SPAMS optimization toolbox](http://spams-devel.gforge.inria.fr/) - For its implementation of the batch LARS algorithm.
 
-For Windows
-```
-This code is self-contained and includes all the precompiled packages.
-```
+Make sure you have all mex files downloaded in the mexfiles path for your specific platform, i.e.
+* Linux® — .mexa64
+* Apple macOS — .mexmaci64
+* Microsoft® Windows® — .mexw64
 
 ## How to run
 
