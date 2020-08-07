@@ -2,14 +2,24 @@ sheep = imread('datasets/Multi_Focus_example/sheep.jpeg');
 gray_sheep = rgb2gray(sheep);
 mask = zeros(size(gray_sheep));
 mask(30:end-32,50:end-40) = 1;
+figure, imshow(mask);
+
 % Segment image into foreground and background using active contour.
 bw = activecontour(gray_sheep, mask, 300);
+figure, imshow(bw);
+
 % Create morphological structuring element.
 se = strel('disk', 3, 0);
-o = imopen(bw, se);
+bw2 = imopen(bw, se);
+figure, imshow(bw2);
+
+% Remove small objects from binary image
+bw3 = bwareaopen(bw2, 80);
+figure, imshow(bw3);
 
 w = fspecial('gaussian', [16 16], 4);
 blurred_sheep = imfilter(sheep, w);
+figure, imshow(blurred_sheep);
 
 [row, col] = size(bw);
 foreground_inFocus_sheep = sheep;
@@ -18,7 +28,7 @@ background_inFocus_sheep = sheep;
 for i=1:row
     for j=1:col
         for d=1:3
-            if bw(i,j) == 0
+            if bw3(i,j) == 0
                 foreground_inFocus_sheep(i,j,d) = blurred_sheep(i,j,d);
             else
                 background_inFocus_sheep(i,j,d) = blurred_sheep(i,j,d);
