@@ -8,6 +8,7 @@
 %              the horizontal and vertical directions.
 % (3) G      - The gradient matrix "G = eye + mu*(Gx'*Gx+Gy'*Gy)".
 % 
+clear;
 
 addpath('functions')
 addpath mexfiles;
