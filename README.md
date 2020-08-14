@@ -1,4 +1,23 @@
 # LoBCoD
+By Ev Zisselman
+Modified by Yuhao Liao
+
+## Enhancement
+Add a create_blurred_images.m script under image_helpers path to generate background-in-focus
+and foreground-in-focus pair from an original image which has clear background-foreground boundary.
+
+Since the situation is different from image to image, I just took an image with a sheep right in
+the middle of the frame to showcase how to create the background-in-focus and foreground-in-focus
+pair from it. For other situations, other types of morphological operations and different parameters
+might be needed.
+
+Result of multi-focus image fusion of the images _sheep_ (background and foreground in-focus) using
+`Demo_Multi_Focus_Fusion.m`:
+<p align="center">
+  <img src="./figures/sheep.png">
+</p>
+
+# Original README.md description:
 A Local Block Coordinate Descent Algorithm for the CSC Model
 
 This is the Matlab package that implements the LoBCoD algorithm.
