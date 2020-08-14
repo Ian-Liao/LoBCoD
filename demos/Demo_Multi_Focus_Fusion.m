@@ -24,9 +24,37 @@ vl_setup();
 % This mat file contains Background_inFocus, Foreground_inFocus, D_init
 % G, Gx, Gy and z_bird_rgb variables
 load('datasets/Multi_Focus_example/Multi_Focus_param.mat');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%START%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%    MODIFY THIS PART IF YOU WANT TO CHANGE THE INPUT IMAGE!    %%%%%%
+
 % Background_inFocus = imread('datasets/Multi_Focus_example/background_inFocus_sheep.jpg');
 % Foreground_inFocus = imread('datasets/Multi_Focus_example/foreground_inFocus_sheep.jpg');
 % z_sheep_rgb = imread('datasets/Multi_Focus_example/sheep.jpeg');
+
+% This size is calculated by the image size 226x300, 
+% pad it with one zero each side => (226+2)x(300+2)
+% reshape it to a vector of size 228 * 302 = 68,856
+n = 68856; 
+D = sparse(1:n,1:n,ones(1,n),n,n);
+E = sparse(2:n,1:n-1,-1*ones(1,n-1),n,n);
+Gx = D+E';
+Gy = E+D;
+mu = 5;
+G = speye(n) + mu*(Gx'*Gx+Gy'*Gy);
+
+Background_inFocus = imread('datasets/Multi_Focus_example/background_inFocus_sheep.jpg');
+Foreground_inFocus = imread('datasets/Multi_Focus_example/foreground_inFocus_sheep.jpg');
+ground_truth = imread('datasets/Multi_Focus_example/sheep.jpeg');
+
+% Transform blurred colored images to the Lab color space
+Background_inFocus_lab = rgb2lab(Background_inFocus);
+Foreground_inFocus_lab = rgb2lab(Foreground_inFocus);
+% ground_truth = rgb2lab(z_bird_rgb);
+I_original = rgb2lab(ground_truth);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%END%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 lambda = 1;
 n =  sqrt(size(D_init,1));
 m = size(D_init,2);
@@ -34,13 +62,6 @@ MAXITER_pursuit = 250;
 
 I = cell(1,2);
 sz = cell(1,2);
-
-% Transform blurred colored images to the Lab color space
-Background_inFocus_lab = rgb2lab(Background_inFocus);
-Foreground_inFocus_lab = rgb2lab(Foreground_inFocus);
-I_original = rgb2lab(z_bird_rgb);
-% I_original = rgb2lab(z_sheep_rgb);
-
 
 % Run the algorithm on the L channels
 I{1} = Background_inFocus_lab(:,:,1);
@@ -148,5 +169,5 @@ fprintf('PSNR: %.3f\n',PSNR);
 figure; 
 subplot(2,2,1); imagesc(Background_inFocus); title('Background in-focus'); axis off
 subplot(2,2,2); imagesc(Foreground_inFocus); title('Foreground in-focus'); axis off
-subplot(2,2,3); imagesc(z_bird_rgb); title('Ground truth'); axis off
+subplot(2,2,3); imagesc(ground_truth); title('Ground truth'); axis off
 subplot(2,2,4); imagesc((lab2rgb(ours_lab))); title(['Our result PSNR: ',num2str(PSNR,4),'dB']); axis off
